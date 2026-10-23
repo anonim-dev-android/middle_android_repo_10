@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,29 +27,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.yandex.buggyweatherapp.R
 import ru.yandex.buggyweatherapp.ui.components.WeatherCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
-    
-    val context = LocalContext.current
-    
-    
+
     DisposableEffect(Unit) {
         viewModel.initialize()
         onDispose {
             
         }
     }
-    
-    
-    val weatherData by viewModel.weatherData.observeAsState()
-    val isLoading by viewModel.isLoading.observeAsState(false)
-    val error by viewModel.error.observeAsState()
-    val cityName by viewModel.cityName.observeAsState("")
-    
+
+    val context = LocalContext.current
+    val uiState by viewModel.weatherUiState.collectAsStateWithLifecycle()
     var searchText by remember { mutableStateOf("") }
     
     Column(
@@ -79,25 +72,24 @@ fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
         )
         
         Spacer(modifier = Modifier.height(16.dp))
-        
-        
-        if (isLoading && weatherData == null) {
+
+        if (uiState.isLoading && uiState.weatherData == null) {
             Text(context.getString(R.string.loading))
         }
-        
-        
-        error?.let {
+
+
+        uiState.error?.let {
             Text(
                 text = it,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(8.dp)
             )
         }
-        
-        weatherData?.let { weather ->
+
+        uiState.weatherData?.let { weather ->
             WeatherCard(
                 weather = weather,
-                cityName = cityName,
+                cityName = uiState.cityName ?: "",
                 onFavoriteClick = { viewModel.toggleFavorite() },
                 onRefreshClick = { viewModel.fetchCurrentLocationWeather() }
             )

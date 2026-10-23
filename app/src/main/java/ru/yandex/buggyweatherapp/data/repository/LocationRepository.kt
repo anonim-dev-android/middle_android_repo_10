@@ -51,7 +51,8 @@ class LocationRepository(
     
     private fun requestLocationUpdates(callback: (Location?) -> Unit) {
         try {
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+            val locationRequest = LocationRequest
+                .Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
                 .setWaitForAccurateLocation(false)
                 .setMinUpdateIntervalMillis(5000)
                 .build()
@@ -62,8 +63,6 @@ class LocationRepository(
                         val userLocation = LocationMapper.parseFromLocation(location)
                         currentLocation = userLocation
                         callback(userLocation)
-                        
-                        
                     }
                 }
             }

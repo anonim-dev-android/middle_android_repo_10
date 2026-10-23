@@ -1,12 +1,11 @@
 package ru.yandex.buggyweatherapp.data.model
 
 import com.google.gson.JsonObject
-import ru.yandex.buggyweatherapp.domain.model.Location
 import ru.yandex.buggyweatherapp.domain.model.WeatherData
 
 object WeatherMapper {
 
-    fun parseJson(json: JsonObject, location: Location): WeatherData {
+    fun parseJson(json: JsonObject): WeatherData {
         val main = json.getAsJsonObject("main")
         val wind = json.getAsJsonObject("wind")
         val sys = json.getAsJsonObject("sys")
