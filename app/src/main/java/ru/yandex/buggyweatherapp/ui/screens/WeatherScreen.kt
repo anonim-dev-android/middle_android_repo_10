@@ -29,9 +29,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.yandex.buggyweatherapp.R
+import ru.yandex.buggyweatherapp.ui.components.LocationSearch
 import ru.yandex.buggyweatherapp.ui.components.WeatherCard
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
 
@@ -44,31 +44,15 @@ fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
 
     val context = LocalContext.current
     val uiState by viewModel.weatherUiState.collectAsStateWithLifecycle()
-    var searchText by remember { mutableStateOf("") }
-    
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = { searchText = it },
-            label = { Text(context.getString(R.string.search_city)) },
-            modifier = Modifier.fillMaxWidth(),
-            trailingIcon = {
-                IconButton(onClick = { viewModel.searchWeatherByCity(searchText) }) {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = context.getString(R.string.search)
-                    )
-                }
-            },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { 
-                viewModel.searchWeatherByCity(searchText) 
-            })
+        LocationSearch(
+            onCitySearch = viewModel::searchWeatherByCity
         )
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -76,7 +60,6 @@ fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
         if (uiState.isLoading && uiState.weatherData == null) {
             Text(context.getString(R.string.loading))
         }
-
 
         uiState.error?.let {
             Text(
