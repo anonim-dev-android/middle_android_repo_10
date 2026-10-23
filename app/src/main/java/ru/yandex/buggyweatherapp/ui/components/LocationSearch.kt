@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import ru.yandex.buggyweatherapp.R
-import ru.yandex.buggyweatherapp.repository.LocationRepository
-import ru.yandex.buggyweatherapp.repository.WeatherRepository
+import ru.yandex.buggyweatherapp.data.repository.LocationRepository
+import ru.yandex.buggyweatherapp.data.repository.WeatherRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

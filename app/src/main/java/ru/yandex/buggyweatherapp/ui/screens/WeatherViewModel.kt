@@ -1,20 +1,18 @@
-package ru.yandex.buggyweatherapp.viewmodel
+package ru.yandex.buggyweatherapp.ui.screens
 
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import ru.yandex.buggyweatherapp.WeatherApplication
-import ru.yandex.buggyweatherapp.model.Location
-import ru.yandex.buggyweatherapp.model.WeatherData
-import ru.yandex.buggyweatherapp.repository.LocationRepository
-import ru.yandex.buggyweatherapp.repository.WeatherRepository
+import ru.yandex.buggyweatherapp.domain.model.Location
+import ru.yandex.buggyweatherapp.domain.model.WeatherData
+import ru.yandex.buggyweatherapp.data.repository.LocationRepository
+import ru.yandex.buggyweatherapp.data.repository.WeatherRepository
 import ru.yandex.buggyweatherapp.utils.ImageLoader
 import ru.yandex.buggyweatherapp.utils.WeatherIconMapper
 import java.util.Timer
@@ -109,7 +107,7 @@ class WeatherViewModel : ViewModel() {
             if (data != null) {
                 weatherData.value = data
                 cityName.value = data.cityName
-                currentLocation.value = Location(0.0, 0.0, data.cityName)
+                currentLocation.value = Location(data.cityName)
             } else {
                 error.value = exception?.message ?: "Unknown error"
             }

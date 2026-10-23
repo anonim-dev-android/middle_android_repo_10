@@ -8,8 +8,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import ru.yandex.buggyweatherapp.data.model.LocationMapper
 import java.util.concurrent.CopyOnWriteArrayList
-import ru.yandex.buggyweatherapp.model.Location as LocalLocation
+import ru.yandex.buggyweatherapp.domain.model.Location as LocalLocation
 
 class LocationTracker private constructor(
     private val locationManager: LocationManager
@@ -20,12 +21,7 @@ class LocationTracker private constructor(
 
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
-            
-            val newLocation = LocalLocation(
-                latitude = location.latitude,
-                longitude = location.longitude
-            )
-
+            val newLocation = LocationMapper.parseFromLocation(location)
             notifyListeners(newLocation)
         }
         

@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import ru.yandex.buggyweatherapp.R
-import ru.yandex.buggyweatherapp.model.WeatherData
+import ru.yandex.buggyweatherapp.domain.model.WeatherData
 import ru.yandex.buggyweatherapp.utils.ImageLoader
 import ru.yandex.buggyweatherapp.utils.WeatherIconMapper
 

@@ -1,4 +1,4 @@
-package ru.yandex.buggyweatherapp.repository
+package ru.yandex.buggyweatherapp.data.repository
 
 import android.content.Context
 import android.location.Geocoder
@@ -10,7 +10,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import ru.yandex.buggyweatherapp.model.Location
+import ru.yandex.buggyweatherapp.data.model.LocationMapper
+import ru.yandex.buggyweatherapp.domain.model.Location
 import ru.yandex.buggyweatherapp.utils.LocationTracker
 import java.util.Locale
 
@@ -37,10 +38,7 @@ class LocationRepository(
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
                     if (location != null) {
-                        val userLocation = Location(
-                            latitude = location.latitude,
-                            longitude = location.longitude
-                        )
+                        val userLocation = LocationMapper.parseFromLocation(location)
                         currentLocation = userLocation
                         callback(userLocation)
                     } else {
@@ -69,10 +67,7 @@ class LocationRepository(
             val locationCallback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult) {
                     locationResult.lastLocation?.let { location ->
-                        val userLocation = Location(
-                            latitude = location.latitude,
-                            longitude = location.longitude
-                        )
+                        val userLocation = LocationMapper.parseFromLocation(location)
                         currentLocation = userLocation
                         callback(userLocation)
                         
