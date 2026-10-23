@@ -1,6 +1,5 @@
 package ru.yandex.buggyweatherapp.utils
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.widget.ImageView
@@ -11,18 +10,10 @@ import java.util.concurrent.ConcurrentHashMap
 
 object ImageLoader {
     
-    private lateinit var appContext: Context
-    
-    
     private val imageCache = ConcurrentHashMap<String, Bitmap>()
     
     
     private val viewReferences = HashMap<String, ImageView>()
-    
-    fun initialize(context: Context) {
-        appContext = context.applicationContext
-    }
-    
     
     suspend fun loadImage(url: String): Bitmap? {
         return if (imageCache.containsKey(url)) {

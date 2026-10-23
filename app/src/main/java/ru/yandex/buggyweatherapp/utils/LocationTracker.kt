@@ -9,39 +9,23 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import java.util.concurrent.CopyOnWriteArrayList
+import ru.yandex.buggyweatherapp.model.Location as LocalLocation
 
 class LocationTracker private constructor(
-    
-    private val context: Context
+    private val locationManager: LocationManager
 ) {
     
-    companion object {
-        @Volatile
-        private var instance: LocationTracker? = null
-        
-        fun getInstance(context: Context): LocationTracker {
-            return instance ?: synchronized(this) {
-                instance ?: LocationTracker(context).also { instance = it }
-            }
-        }
-    }
+    private val listeners = CopyOnWriteArrayList<(LocalLocation) -> Unit>()
     
-    
-    private val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    
-    
-    private val listeners = CopyOnWriteArrayList<(ru.yandex.buggyweatherapp.model.Location) -> Unit>()
-    
-    
+
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
             
-            val newLocation = ru.yandex.buggyweatherapp.model.Location(
+            val newLocation = LocalLocation(
                 latitude = location.latitude,
                 longitude = location.longitude
             )
-            
-            
+
             notifyListeners(newLocation)
         }
         
@@ -73,11 +57,11 @@ class LocationTracker private constructor(
     }
     
     
-    fun addListener(listener: (ru.yandex.buggyweatherapp.model.Location) -> Unit) {
+    fun addListener(listener: (LocalLocation) -> Unit) {
         listeners.add(listener)
     }
     
-    private fun notifyListeners(location: ru.yandex.buggyweatherapp.model.Location) {
+    private fun notifyListeners(location: LocalLocation) {
         
         Handler(Looper.getMainLooper()).post {
             for (listener in listeners) {
@@ -85,6 +69,19 @@ class LocationTracker private constructor(
             }
         }
     }
-    
+
+
+    companion object {
+        @Volatile
+        private var instance: LocationTracker? = null
+
+        fun getInstance(context: Context): LocationTracker {
+            return instance ?: synchronized(this) {
+                instance ?: LocationTracker(
+                    context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                ).also { instance = it }
+            }
+        }
+    }
     
 }
