@@ -39,9 +39,7 @@ fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
     
     
     DisposableEffect(Unit) {
-        
-        viewModel.initialize(context)
-        
+        viewModel.initialize()
         onDispose {
             
         }

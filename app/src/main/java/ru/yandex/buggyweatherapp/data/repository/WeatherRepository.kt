@@ -5,18 +5,15 @@ import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import ru.yandex.buggyweatherapp.data.api.RetrofitInstance
+import ru.yandex.buggyweatherapp.data.api.WeatherApiService
 import ru.yandex.buggyweatherapp.data.model.LocationMapper
 import ru.yandex.buggyweatherapp.data.model.WeatherMapper
 import ru.yandex.buggyweatherapp.domain.model.Location
 import ru.yandex.buggyweatherapp.domain.model.WeatherData
 
-class WeatherRepository {
-    
-    
-    private val weatherApi = RetrofitInstance.weatherApi
-    
-    
+class WeatherRepository(
+    private val weatherApi: WeatherApiService
+) {
     private var cachedWeatherData: WeatherData? = null
     
     

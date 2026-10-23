@@ -1,6 +1,5 @@
 package ru.yandex.buggyweatherapp.ui.screens
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.MutableLiveData
@@ -9,27 +8,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import ru.yandex.buggyweatherapp.domain.model.Location
-import ru.yandex.buggyweatherapp.domain.model.WeatherData
 import ru.yandex.buggyweatherapp.data.repository.LocationRepository
 import ru.yandex.buggyweatherapp.data.repository.WeatherRepository
+import ru.yandex.buggyweatherapp.domain.model.Location
+import ru.yandex.buggyweatherapp.domain.model.WeatherData
 import ru.yandex.buggyweatherapp.utils.ImageLoader
 import ru.yandex.buggyweatherapp.utils.WeatherIconMapper
 import java.util.Timer
 import java.util.TimerTask
 
-class WeatherViewModel : ViewModel() {
-    
-    
-    private lateinit var activityContext: Context
-    
-    
-    private val weatherRepository = WeatherRepository()
-    private val locationRepository by lazy { 
-        LocationRepository(activityContext)
-    }
-    
-    
+class WeatherViewModel(
+    private val weatherRepository: WeatherRepository
+    private val locationRepository: LocationRepository
+) : ViewModel() {
+
     val weatherData = MutableLiveData<WeatherData>()
     val currentLocation = MutableLiveData<Location>()
     val isLoading = MutableLiveData<Boolean>()
@@ -43,13 +35,12 @@ class WeatherViewModel : ViewModel() {
     private var refreshTimer: Timer? = null
     
     
-    fun initialize(context: Context) {
-        this.activityContext = context
+    fun initialize() {
         fetchCurrentLocationWeather()
-        
-        
         startAutoRefresh()
     }
+
+    fun startLocationTracking() = locationRepository.startLocationTracking()
     
     
     fun fetchCurrentLocationWeather() {
@@ -59,8 +50,8 @@ class WeatherViewModel : ViewModel() {
         locationRepository.getCurrentLocation { location ->
             if (location != null) {
                 currentLocation.value = location
-                
-                
+
+
                 val cityNameFromLocation = locationRepository.getCityNameFromLocation(location)
                 cityName.value = cityNameFromLocation
                 

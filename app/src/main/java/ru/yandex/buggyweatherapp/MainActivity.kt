@@ -19,11 +19,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import ru.yandex.buggyweatherapp.ui.screens.WeatherScreen
 import ru.yandex.buggyweatherapp.ui.theme.BuggyWeatherAppTheme
-import ru.yandex.buggyweatherapp.ui.screens.WeatherViewModel
 
 class MainActivity : ComponentActivity() {
 
-    private val weatherViewModel = WeatherViewModel()
+    private val weatherViewModel by lazy { this.depContainer().viewModel }
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -31,9 +30,11 @@ class MainActivity : ComponentActivity() {
         when {
             permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
                 Log.d("Main", "ACCESS_FINE_LOCATION is granted")
+                weatherViewModel.startLocationTracking()
             }
             permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
                 Log.d("Main", "ACCESS_COARSE_LOCATION is granted")
+                weatherViewModel.startLocationTracking()
             }
             else -> {
                 Log.e("Main", "No location permissions have been granted")
@@ -44,7 +45,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        checkPermissions()
 
+        enableEdgeToEdge()
+        setContent {
+            BuggyWeatherAppTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    WeatherScreen(
+                        viewModel = weatherViewModel,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun checkPermissions() {
         val hasFineLocation = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -63,21 +79,7 @@ class MainActivity : ComponentActivity() {
                 )
             )
         }
-
-        enableEdgeToEdge()
-
-        setContent {
-            BuggyWeatherAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    WeatherScreen(
-                        viewModel = weatherViewModel,
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
     }
-
 
     override fun onDestroy() {
         super.onDestroy()

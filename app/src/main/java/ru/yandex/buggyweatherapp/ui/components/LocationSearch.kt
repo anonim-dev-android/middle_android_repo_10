@@ -74,13 +74,12 @@ fun LocationSearch(
 }
 
 @Composable
-fun LocationSearchWithDirectApiCall() {
+fun LocationSearchWithDirectApiCall(
+    weatherRepository: WeatherRepository,
+    locationRepository: LocationRepository
+) {
     val context = LocalContext.current
     var searchText by remember { mutableStateOf("") }
-    
-    
-    val weatherRepository = WeatherRepository()
-    val locationRepository = LocationRepository(context)
     
     OutlinedTextField(
         value = searchText,
