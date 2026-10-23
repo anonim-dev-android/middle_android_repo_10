@@ -1,9 +1,6 @@
 package ru.yandex.buggyweatherapp.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,12 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,8 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import ru.yandex.buggyweatherapp.model.WeatherData
-import ru.yandex.buggyweatherapp.utils.WeatherIconMapper
+import ru.yandex.buggyweatherapp.R
+import ru.yandex.buggyweatherapp.ui.components.WeatherCard
 import ru.yandex.buggyweatherapp.viewmodel.WeatherViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,14 +65,14 @@ fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
         OutlinedTextField(
             value = searchText,
             onValueChange = { searchText = it },
-            label = { Text("Search city") },
+            label = { Text(context.getString(R.string.search_city)) },
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
-                IconButton(onClick = { 
-                    
-                    viewModel.searchWeatherByCity(searchText) 
-                }) {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
+                IconButton(onClick = { viewModel.searchWeatherByCity(searchText) }) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = context.getString(R.string.search)
+                    )
                 }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -93,7 +85,7 @@ fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
         
         
         if (isLoading && weatherData == null) {
-            Text("Loading weather data...")
+            Text(context.getString(R.string.loading))
         }
         
         
@@ -112,108 +104,6 @@ fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
                 onFavoriteClick = { viewModel.toggleFavorite() },
                 onRefreshClick = { viewModel.fetchCurrentLocationWeather() }
             )
-        }
-    }
-}
-
-@Composable
-fun WeatherCard(
-    weather: WeatherData,
-    cityName: String,
-    onFavoriteClick: () -> Unit,
-    onRefreshClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = cityName.ifEmpty { weather.cityName },
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                
-                Row {
-                    IconButton(onClick = onFavoriteClick) {
-                        Icon(
-                            imageVector = if (weather.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Favorite"
-                        )
-                    }
-                    
-                    IconButton(onClick = onRefreshClick) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh"
-                        )
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            
-            Text(
-                text = "Temperature: " + weather.temperature.toString() + "°C",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            
-            Text(
-                text = "Feels like: " + weather.feelsLike.toString() + "°C",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            
-            Text(
-                text = "Description: " + weather.description.replaceFirstChar { it.uppercase() },
-                style = MaterialTheme.typography.bodyMedium
-            )
-            
-            Text(
-                text = "Humidity: " + weather.humidity.toString() + "%",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            
-            Text(
-                text = "Wind: " + weather.windSpeed.toString() + " m/s",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                
-                Text(
-                    text = "Sunrise: " + WeatherIconMapper.formatTimestamp(weather.sunriseTime),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                
-                Text(
-                    text = "Sunset: " + WeatherIconMapper.formatTimestamp(weather.sunsetTime),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Button(
-                onClick = onRefreshClick,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text("Refresh Weather")
-            }
         }
     }
 }

@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import ru.yandex.buggyweatherapp.api.RetrofitInstance
+import ru.yandex.buggyweatherapp.R
 import ru.yandex.buggyweatherapp.repository.LocationRepository
 import ru.yandex.buggyweatherapp.repository.WeatherRepository
 
@@ -32,19 +32,23 @@ fun LocationSearch(
     onCitySearch: (String) -> Unit,
     onLocationRequest: () -> Unit
 ) {
+    val context = LocalContext.current
     var searchText by remember { mutableStateOf("") }
     
     Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = searchText,
             onValueChange = { searchText = it },
-            label = { Text("Search city") },
+            label = { Text(context.getString(R.string.search_city)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             leadingIcon = {
                 IconButton(onClick = { onLocationRequest() }) {
-                    Icon(Icons.Default.LocationOn, contentDescription = "Get current location")
+                    Icon(
+                        Icons.Default.LocationOn,
+                        contentDescription = context.getString(R.string.get_current_location)
+                    )
                 }
             },
             trailingIcon = {
@@ -53,7 +57,10 @@ fun LocationSearch(
                         onCitySearch(searchText)
                     }
                 }) {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = context.getString(R.string.search)
+                    )
                 }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -78,7 +85,7 @@ fun LocationSearchWithDirectApiCall() {
     OutlinedTextField(
         value = searchText,
         onValueChange = { searchText = it },
-        label = { Text("Search city") },
+        label = { Text(context.getString(R.string.search_city)) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -89,7 +96,9 @@ fun LocationSearchWithDirectApiCall() {
                     weatherRepository.getWeatherByCity(searchText) { weatherData, error -> }
                 }
             }) {
-                Icon(Icons.Default.Search, contentDescription = "Search")
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = context.getString(R.string.search))
             }
         }
     )

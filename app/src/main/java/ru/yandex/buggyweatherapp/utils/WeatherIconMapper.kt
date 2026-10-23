@@ -12,7 +12,8 @@ object WeatherIconMapper {
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
         return sdf.format(date)
     }
-    
+
+    fun getPngLink(iconCode: String): String = "https://openweathermap.org/img/wn/$iconCode@2x.png"
     
     fun getWeatherDescription(description: String, temperature: Double): String {
         var result = ""

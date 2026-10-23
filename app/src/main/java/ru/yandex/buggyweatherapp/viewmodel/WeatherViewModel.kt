@@ -16,6 +16,7 @@ import ru.yandex.buggyweatherapp.model.WeatherData
 import ru.yandex.buggyweatherapp.repository.LocationRepository
 import ru.yandex.buggyweatherapp.repository.WeatherRepository
 import ru.yandex.buggyweatherapp.utils.ImageLoader
+import ru.yandex.buggyweatherapp.utils.WeatherIconMapper
 import java.util.Timer
 import java.util.TimerTask
 
@@ -123,7 +124,7 @@ class WeatherViewModel : ViewModel() {
     
     fun loadWeatherIcon(iconCode: String) {
         coroutineScope.launch {
-            val iconUrl = "https://openweathermap.org/img/wn/$iconCode@2x.png"
+            val iconUrl = WeatherIconMapper.getPngLink(iconCode)
             ImageLoader.loadImage(iconUrl)
         }
     }

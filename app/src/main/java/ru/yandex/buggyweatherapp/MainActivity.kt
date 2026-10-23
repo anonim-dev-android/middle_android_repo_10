@@ -3,6 +3,8 @@ package ru.yandex.buggyweatherapp
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,38 +23,39 @@ import ru.yandex.buggyweatherapp.ui.theme.BuggyWeatherAppTheme
 import ru.yandex.buggyweatherapp.viewmodel.WeatherViewModel
 
 class MainActivity : ComponentActivity() {
-    
+
     private val weatherViewModel = WeatherViewModel()
-    
+
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         when {
             permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
-                
+                Log.d("Main", "ACCESS_FINE_LOCATION is granted")
             }
             permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
-                
+                Log.d("Main", "ACCESS_COARSE_LOCATION is granted")
             }
             else -> {
-                
+                Log.e("Main", "No location permissions have been granted")
+                Toast.makeText(this, this.getString(R.string.no_location_permission), Toast.LENGTH_SHORT).show()
             }
         }
     }
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         val hasFineLocation = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-        
+
         val hasCoarseLocation = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-        
+
         if (!hasFineLocation && !hasCoarseLocation) {
             locationPermissionRequest.launch(
                 arrayOf(
@@ -61,9 +64,9 @@ class MainActivity : ComponentActivity() {
                 )
             )
         }
-        
+
         enableEdgeToEdge()
-        
+
         setContent {
             BuggyWeatherAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -75,11 +78,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    
-    
+
+
     override fun onDestroy() {
         super.onDestroy()
-        
+
     }
 }
 
@@ -87,7 +90,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun WeatherAppPreview() {
     BuggyWeatherAppTheme {
-        
+
         Text("Weather App Preview")
     }
 }
