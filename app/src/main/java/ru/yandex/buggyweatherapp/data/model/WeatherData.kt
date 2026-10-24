@@ -2,7 +2,7 @@ package ru.yandex.buggyweatherapp.data.model
 
 data class WeatherData(
     val cityName: String,
-    val country: String,
+    val country: String?,
     val temperature: Double,
     val feelsLike: Double,
     val minTemp: Double,

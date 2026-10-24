@@ -1,12 +1,14 @@
 [versions]
 agp = "8.8.1"
 kotlin = "2.0.0"
+ksp = "2.0.21-1.0.26"
 coreKtx = "1.10.1"
 lifecycleRuntimeKtx = "2.6.1"
 composeBom = "2024.04.01"
 compose = "1.8.0"
 retrofit = "2.10.0"
 okhttp = "4.10.0"
+room = "2.6.1"
 coroutines = "1.7.3"
 lifecycleVM = "2.6.2"
 playServices = "21.0.1"
@@ -32,6 +34,10 @@ squareup-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", versi
 squareup-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 squareup-okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleVM" }
@@ -53,6 +59,7 @@ compose-ui = [
     "androidx-ui-tooling-preview"
 ]
 network = [ "squareup-retrofit", "squareup-gson", "squareup-okhttp3" ]
+room = [ "room-runtime", "room-ktx" ]
 coroutines = [ "kotlinx-coroutines-core", "kotlinx-coroutines-android" ]
 viewmodel = [ "lifecycle-viewmodel-ktx", "lifecycle-viewmodel-compose" ]
 
@@ -61,4 +68,4 @@ viewmodel = [ "lifecycle-viewmodel-ktx", "lifecycle-viewmodel-compose" ]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
+tools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

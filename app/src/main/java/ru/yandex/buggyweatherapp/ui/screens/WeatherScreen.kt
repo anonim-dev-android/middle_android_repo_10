@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,11 +22,8 @@ import ru.yandex.buggyweatherapp.ui.components.WeatherCard
 @Composable
 fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
 
-    DisposableEffect(Unit) {
+    LaunchedEffect(Unit) {
         viewModel.initialize()
-        onDispose {
-            
-        }
     }
 
     val context = LocalContext.current
@@ -61,7 +58,7 @@ fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
                 weather = weather,
                 cityName = uiState.cityName ?: "",
                 onFavoriteClick = { viewModel.toggleFavorite() },
-                onRefreshClick = { viewModel.fetchCurrentLocationWeather() }
+                onRefreshClick = { viewModel.refreshWeatherForCurrentLocation() }
             )
         }
     }

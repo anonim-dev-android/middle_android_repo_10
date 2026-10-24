@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.yandex.buggyweatherapp.data.repository.FavRepository
 import ru.yandex.buggyweatherapp.data.repository.LocationRepository
 import ru.yandex.buggyweatherapp.data.repository.WeatherRepository
 import ru.yandex.buggyweatherapp.domain.model.Location
@@ -16,7 +17,8 @@ import java.util.TimerTask
 
 class WeatherViewModel(
     private val weatherRepository: WeatherRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val favRepository: FavRepository
 ) : ViewModel() {
 
 
@@ -41,7 +43,7 @@ class WeatherViewModel(
         startWeatherAutoRefresh()
     }
     
-    fun fetchCurrentLocationWeather() {
+    private fun fetchCurrentLocationWeather() {
         handleLoadingState()
         viewModelScope.launch {
             locationRepository.getCurrentLocation { location ->
@@ -58,8 +60,10 @@ class WeatherViewModel(
             }
         }
     }
+
+    fun refreshWeatherForCurrentLocation() = _currentLocation.value?.let { getWeatherForLocation(it) }
     
-    fun getWeatherForLocation(location: Location) {
+    private fun getWeatherForLocation(location: Location) {
         handleLoadingState()
         viewModelScope.launch {
             weatherRepository.getWeatherData(location) { data, exception ->
@@ -82,7 +86,6 @@ class WeatherViewModel(
         handleLoadingState()
         viewModelScope.launch {
             weatherRepository.getWeatherByCity(city) { data, exception ->
-                // TODO: проверить, что обновляется и не просит Main
                 if (data != null) {
                     handleSuccessState(
                         mapOf(
@@ -100,10 +103,12 @@ class WeatherViewModel(
     }
 
     fun toggleFavorite() {
-        _weatherUiState.value.data?.let { currData ->
-            handleSuccessState(
-                mapOf(ArgsKey.WEATHER to currData.copy(isFavorite = !currData.isFavorite))
-            )
+        viewModelScope.launch {
+            _weatherUiState.value.data?.let { currData ->
+                val newFavState = !currData.isFavorite
+                favRepository.setCityFavState(currData.data.cityName, newFavState)
+                handleSuccessState(mapOf(ArgsKey.WEATHER to currData.copy(isFavorite = newFavState)))
+            }
         }
     }
     
@@ -165,6 +170,7 @@ class WeatherViewModel(
      * @see Weather
      */
     private fun handleSuccessState(args: Map<ArgsKey, Any?>) {
+        Log.d("WeatherViewModel", "handleSuccessState with args: ${args.entries.map{ entry -> "${entry.key} - ${entry.value}" }.joinToString(", ")}")
         _weatherUiState.update { _weatherUiState.value.copy(
             // include stopping loading moves
             isLoading = false,
@@ -178,17 +184,23 @@ class WeatherViewModel(
     /**
      * Updated [_weatherUiState] with `isLoading = true` flag. Error message was reset.
      */
-    private fun handleLoadingState() =
+    private fun handleLoadingState() {
+        Log.d("WeatherViewModel", "handleLoadingState")
         _weatherUiState.update { _weatherUiState.value.copy(isLoading = true, error = null) }
+    }
+
 
     /**
      * Updated [_weatherUiState] with error message. The function includes `isLoading = false`!
      */
-    private fun handleErrorState(message: String) =
+    private fun handleErrorState(message: String) {
+        Log.d("WeatherViewModel", "handleErrorState message: $message")
         _weatherUiState.update { _weatherUiState.value.copy(isLoading = false, error = message) }
+    }
 
 
     private fun handleLocation(location: Location?) {
+        Log.d("WeatherViewModel", "handleLocation location: $location")
         _currentLocation.update { location }
     }
 

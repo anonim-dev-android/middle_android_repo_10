@@ -13,10 +13,5 @@ object WeatherIconMapper {
     }
 
     fun getPngLink(iconCode: String): String = "https://openweathermap.org/img/wn/$iconCode@2x.png"
-    
-    fun getWeatherDescription(description: String, temperature: Double) =
-        "${description.replaceFirstChar { it.uppercase() }}, ${temperature.toInt()}°C"
-    
-    fun getWeatherIconResource(iconCode: String): Int = 0
-    fun getBackgroundColor(weatherId: Int, temperature: Double): Int = 0
+
 }

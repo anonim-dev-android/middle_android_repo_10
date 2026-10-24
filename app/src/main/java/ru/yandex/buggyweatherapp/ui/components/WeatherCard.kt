@@ -48,7 +48,7 @@ fun WeatherCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             HeaderBlock(
-                cityName = cityName.ifEmpty { weather.data.cityName },
+                cityName = if (cityName.isEmpty()) weather.data.cityName else "$cityName, ${weather.data.cityName}",
                 isFavouriteWeather = weather.isFavorite,
                 onFavoriteClick = onFavoriteClick,
                 onRefreshClick = onRefreshClick
@@ -110,8 +110,10 @@ fun WeatherImageBlock(weather: Weather) {
             factory = { imageView },
             modifier = Modifier.size(50.dp)
         ) {
-            val iconUrl = WeatherIconMapper.getPngLink(weather.data.icon)
-            ImageLoader.loadInto(iconUrl, it)
+            ImageLoader.loadInto(
+                WeatherIconMapper.getPngLink(weather.data.icon),
+                it
+            )
         }
 
         TextHeadline(
@@ -119,16 +121,6 @@ fun WeatherImageBlock(weather: Weather) {
         )
     }
 
-
-    DisposableEffect(weather.data.icon) {
-        val iconUrl = WeatherIconMapper.getPngLink(weather.data.icon)
-        val bitmap = ImageLoader.loadImageSync(iconUrl)
-        imageView.setImageBitmap(bitmap)
-
-        onDispose {
-
-        }
-    }
 }
 
 @Composable

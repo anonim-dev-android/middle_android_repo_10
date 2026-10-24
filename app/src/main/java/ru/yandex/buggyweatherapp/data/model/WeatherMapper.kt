@@ -1,5 +1,6 @@
 package ru.yandex.buggyweatherapp.data.model
 
+import android.util.Log
 import com.google.gson.JsonObject
 import ru.yandex.buggyweatherapp.domain.model.Weather
 
@@ -9,6 +10,7 @@ object WeatherMapper {
      * Converts from WeatherApi json-object to [WeatherData]
      */
     fun parseJson(json: JsonObject): WeatherData {
+        Log.d("WeatherMapper", "parseJson $json")
         val main = json.getAsJsonObject("main")
         val wind = json.getAsJsonObject("wind")
         val sys = json.getAsJsonObject("sys")
@@ -17,7 +19,7 @@ object WeatherMapper {
 
         return WeatherData(
             cityName = json.get("name").asString,
-            country = sys.get("country").asString,
+            country = sys.get("country")?.asString,
             temperature = main.get("temp").asDouble,
             feelsLike = main.get("feels_like").asDouble,
             minTemp = main.get("temp_min").asDouble,
@@ -44,6 +46,6 @@ object WeatherMapper {
     /**
      * Converts from [WeatherData] to ui [ru.yandex.buggyweatherapp.domain.model.Weather]
      */
-    fun parseToUserWeather(weatherData: WeatherData) = Weather(weatherData, false, false)
+    fun parseToUserWeather(weatherData: WeatherData, isFavouriteCity: Boolean = false) = Weather(weatherData, isFavouriteCity)
 
 }

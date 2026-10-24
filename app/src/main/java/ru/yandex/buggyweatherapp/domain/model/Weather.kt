@@ -4,6 +4,5 @@ import ru.yandex.buggyweatherapp.data.model.WeatherData
 
 data class Weather(
     val data: WeatherData,
-    var isFavorite: Boolean = false,
-    var isSelected: Boolean = false
+    var isFavorite: Boolean = false
 )
