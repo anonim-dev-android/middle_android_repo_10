@@ -11,37 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
 object ImageLoader {
     
     private val imageCache = ConcurrentHashMap<String, Bitmap>()
-    
-    
     private val viewReferences = HashMap<String, ImageView>()
-    
-    suspend fun loadImage(url: String): Bitmap? {
-        return if (imageCache.containsKey(url)) {
-            imageCache[url]
-        } else {
-            try {
-                
-                val bitmap = withContext(Dispatchers.IO) {
-                    val connection = URL(url).openConnection()
-                    connection.connectTimeout = 5000
-                    connection.readTimeout = 5000
-                    connection.connect()
-                    
-                    val inputStream = connection.getInputStream()
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
-                    inputStream.close()
-                    
-                    
-                    imageCache[url] = bitmap
-                    bitmap
-                }
-                bitmap
-            } catch (e: Exception) {
-                
-                null
-            }
-        }
-    }
     
     
     fun loadImageSync(url: String): Bitmap? {

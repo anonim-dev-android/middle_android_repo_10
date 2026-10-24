@@ -6,7 +6,7 @@ import ru.yandex.buggyweatherapp.di.DependencyContainer
 
 class WeatherApplication : Application() {
 
-    val depContainer = DependencyContainer(this)
+    val depContainer by lazy { DependencyContainer(this) }
 
 }
 

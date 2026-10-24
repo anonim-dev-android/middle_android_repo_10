@@ -1,86 +1,66 @@
 package ru.yandex.buggyweatherapp.ui.components
 
+import android.widget.ImageView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import ru.yandex.buggyweatherapp.R
-import ru.yandex.buggyweatherapp.data.model.WeatherData
+import ru.yandex.buggyweatherapp.domain.model.Weather
+import ru.yandex.buggyweatherapp.utils.ImageLoader
 import ru.yandex.buggyweatherapp.utils.WeatherIconMapper
 
 @Composable
 fun WeatherCard(
-    weather: WeatherData,
+    weather: Weather,
     cityName: String,
     onFavoriteClick: () -> Unit,
     onRefreshClick: () -> Unit
 ) {
-    val context = LocalContext.current
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             HeaderBlock(
-                cityName = cityName.ifEmpty { weather.cityName },
+                cityName = cityName.ifEmpty { weather.data.cityName },
                 isFavouriteWeather = weather.isFavorite,
                 onFavoriteClick = onFavoriteClick,
                 onRefreshClick = onRefreshClick
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextMedium(
-                text = context.getString(R.string.temperature, weather.temperature.toString())
-            )
-            TextMedium(
-                text = context.getString(R.string.feels_like, weather.feelsLike.toString())
-            )
-            TextMedium(
-                text = context.getString(R.string.description, weather.description.replaceFirstChar { it.uppercase() })
-            )
-            TextMedium(
-                text = context.getString(R.string.humidity, weather.humidity.toString())
-            )
-            TextMedium(
-                text = context.getString(R.string.wind, weather.windSpeed.toString())
+            WeatherImageBlock(weather)
+            TextLarge(
+                text = weather.data.description.replaceFirstChar { it.uppercase() }
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            SunBlock(sunriseTime = weather.sunriseTime, sunsetTime = weather.sunsetTime)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = onRefreshClick,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text(context.getString(R.string.refresh_weather))
-            }
+            WeatherDataBlock(weather)
+            SunBlock(sunriseTime = weather.data.sunriseTime, sunsetTime = weather.data.sunsetTime)
         }
     }
 }
@@ -116,6 +96,63 @@ fun HeaderBlock(
             }
         }
     }
+}
+
+@Composable
+fun WeatherImageBlock(weather: Weather) {
+    val context = LocalContext.current
+    val imageView = remember { ImageView(context) }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AndroidView(
+            factory = { imageView },
+            modifier = Modifier.size(50.dp)
+        ) {
+            val iconUrl = WeatherIconMapper.getPngLink(weather.data.icon)
+            ImageLoader.loadInto(iconUrl, it)
+        }
+
+        TextHeadline(
+            text = context.getString(R.string.temperature_celsium, weather.data.temperature)
+        )
+    }
+
+
+    DisposableEffect(weather.data.icon) {
+        val iconUrl = WeatherIconMapper.getPngLink(weather.data.icon)
+        val bitmap = ImageLoader.loadImageSync(iconUrl)
+        imageView.setImageBitmap(bitmap)
+
+        onDispose {
+
+        }
+    }
+}
+
+@Composable
+fun WeatherDataBlock(weather: Weather) {
+    val context = LocalContext.current
+
+    Column {
+        TextMedium(
+            text = context.getString(R.string.feels_like, weather.data.feelsLike)
+        )
+        TextMedium(
+            text = context.getString(R.string.min_max, weather.data.minTemp, weather.data.minTemp)
+        )
+        TextMedium(
+            text = context.getString(R.string.humidity, weather.data.humidity)
+        )
+        TextMedium(
+            text = context.getString(R.string.pressure, weather.data.pressure)
+        )
+        TextMedium(
+            text = context.getString(R.string.wind, weather.data.windSpeed)
+        )
+    }
+
 }
 
 @Composable

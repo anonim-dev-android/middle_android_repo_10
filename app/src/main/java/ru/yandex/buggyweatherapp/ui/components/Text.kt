@@ -13,6 +13,14 @@ fun TextHeadline(text: String) {
 }
 
 @Composable
+fun TextLarge(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyLarge
+    )
+}
+
+@Composable
 fun TextMedium(text: String) {
     Text(
         text = text,
