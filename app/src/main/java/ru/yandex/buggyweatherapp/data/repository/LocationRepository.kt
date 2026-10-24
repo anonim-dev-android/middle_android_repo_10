@@ -17,21 +17,29 @@ class LocationRepository(
     private val geocoder: Geocoder,
     private val locationTracker: LocationTracker
 ) {
-    
-    private var currentLocation: Location? = null
-    private var locationCallback: ((Location?) -> Unit)? = null
-    
-    
+
+    fun startLocationTracking() {
+        locationTracker.startTracking()
+    }
+
+    fun subscribeToTracking(listener: (Location) -> Unit) {
+        locationTracker.addListener(listener)
+    }
+
+    fun unsubscribeToTracking(listener: (Location) -> Unit) {
+        locationTracker.removeListener(listener)
+    }
+
+    fun stopLocationTracking() {
+        locationTracker.stopTracking()
+    }
+
     fun getCurrentLocation(callback: (Location?) -> Unit) {
         try {
-            locationCallback = callback
-            
-            
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
                     if (location != null) {
-                        val userLocation = LocationMapper.parseFromLocation(location)
-                        currentLocation = userLocation
+                        val userLocation = LocationMapper.parseToUserLocation(location)
                         callback(userLocation)
                     } else {
                         
@@ -60,13 +68,12 @@ class LocationRepository(
             val locationCallback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult) {
                     locationResult.lastLocation?.let { location ->
-                        val userLocation = LocationMapper.parseFromLocation(location)
-                        currentLocation = userLocation
+                        val userLocation = LocationMapper.parseToUserLocation(location)
+                        fusedLocationClient.removeLocationUpdates(this)
                         callback(userLocation)
                     }
                 }
             }
-            
             
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
@@ -87,12 +94,10 @@ class LocationRepository(
             
             return if (!addresses.isNullOrEmpty()) {
                 val address = addresses[0]
-                if (address.locality != null) {
-                    address.locality
-                } else if (address.subAdminArea != null) {
-                    address.subAdminArea
-                } else {
-                    address.adminArea
+                when {
+                    address.locality != null -> address.locality
+                    address.subAdminArea != null -> address.subAdminArea
+                    else -> address.adminArea
                 }
             } else {
                 null
@@ -101,11 +106,6 @@ class LocationRepository(
             Log.e("LocationRepository", "Error getting city name", e)
             return null
         }
-    }
-    
-    
-    fun startLocationTracking() {
-        locationTracker.startTracking()
     }
     
 }

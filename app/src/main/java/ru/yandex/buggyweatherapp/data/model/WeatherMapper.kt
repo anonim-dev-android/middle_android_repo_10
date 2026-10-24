@@ -1,10 +1,13 @@
 package ru.yandex.buggyweatherapp.data.model
 
 import com.google.gson.JsonObject
-import ru.yandex.buggyweatherapp.domain.model.WeatherData
+import ru.yandex.buggyweatherapp.domain.model.Weather
 
 object WeatherMapper {
 
+    /**
+     * Converts from WeatherApi json-object to [WeatherData]
+     */
     fun parseJson(json: JsonObject): WeatherData {
         val main = json.getAsJsonObject("main")
         val wind = json.getAsJsonObject("wind")
@@ -37,5 +40,10 @@ object WeatherMapper {
                 json.getAsJsonObject("snow").get("1h").asDouble else null
         )
     }
+
+    /**
+     * Converts from [WeatherData] to ui [ru.yandex.buggyweatherapp.domain.model.Weather]
+     */
+    fun parseToUserWeather(weatherData: WeatherData) = Weather(weatherData, false, false)
 
 }

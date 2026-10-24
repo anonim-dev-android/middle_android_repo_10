@@ -21,7 +21,8 @@ class LocationTracker private constructor(
 
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
-            val newLocation = LocationMapper.parseFromLocation(location)
+            val newLocation = LocationMapper.parseToUserLocation(location)
+            Log.d("LocationTracker", "Location has been changed! New value: $newLocation")
             notifyListeners(newLocation)
         }
         
@@ -36,29 +37,34 @@ class LocationTracker private constructor(
     
     fun startTracking() {
         try {
-            
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
                 5000, // 5 секунд
                 10f, // 10 метров
                 locationListener
             )
-            
-            
         } catch (e: SecurityException) {
             Log.e("LocationTracker", "Permission denied", e)
         } catch (e: Exception) {
             Log.e("LocationTracker", "Error starting location tracking", e)
         }
     }
-    
+
+    fun stopTracking() {
+        listeners.clear()
+        locationManager.removeUpdates(locationListener)
+    }
     
     fun addListener(listener: (LocalLocation) -> Unit) {
         listeners.add(listener)
     }
-    
+
+    fun removeListener(listener: (LocalLocation) -> Unit) {
+        listeners.remove(listener)
+    }
+
     private fun notifyListeners(location: LocalLocation) {
-        
+        // TODO: проверить, что обновляется и не просит Main
         Handler(Looper.getMainLooper()).post {
             for (listener in listeners) {
                 listener(location)

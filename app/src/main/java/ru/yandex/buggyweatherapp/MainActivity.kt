@@ -82,8 +82,8 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        weatherViewModel.stopLocationTracking()
         super.onDestroy()
-
     }
 }
 

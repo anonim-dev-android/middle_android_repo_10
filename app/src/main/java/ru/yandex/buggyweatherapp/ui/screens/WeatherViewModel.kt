@@ -1,10 +1,8 @@
 package ru.yandex.buggyweatherapp.ui.screens
 
-import android.os.Handler
-import android.os.Looper
-import androidx.lifecycle.MutableLiveData
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -12,14 +10,11 @@ import kotlinx.coroutines.launch
 import ru.yandex.buggyweatherapp.data.repository.LocationRepository
 import ru.yandex.buggyweatherapp.data.repository.WeatherRepository
 import ru.yandex.buggyweatherapp.domain.model.Location
-import ru.yandex.buggyweatherapp.domain.model.WeatherData
-import ru.yandex.buggyweatherapp.utils.ImageLoader
-import ru.yandex.buggyweatherapp.utils.WeatherIconMapper
+import ru.yandex.buggyweatherapp.domain.model.Weather
 import java.util.Timer
 import java.util.TimerTask
 
 class WeatherViewModel(
-    private val coroutineScope: CoroutineScope,
     private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository
 ) : ViewModel() {
@@ -28,41 +23,50 @@ class WeatherViewModel(
     private val _weatherUiState = MutableStateFlow(WeatherUiState())
     val weatherUiState = _weatherUiState.asStateFlow()
 
-    private val currentLocation = MutableLiveData<Location>()
+    private val _currentLocation = MutableStateFlow<Location?>(null)
     
     private var refreshTimer: Timer? = null
-    
+    private val refreshDelay = 60_000L
+
+    private val trackingListener: (Location) -> Unit = { localLocation ->
+        if (_currentLocation.value != localLocation) {
+            handleLocation(localLocation)
+        }
+    }
     
     fun initialize() {
+        // subscribing to tracking
+        locationRepository.subscribeToTracking(trackingListener)
         fetchCurrentLocationWeather()
-        startAutoRefresh()
+        startWeatherAutoRefresh()
     }
-
-    fun startLocationTracking() = locationRepository.startLocationTracking()
-    
     
     fun fetchCurrentLocationWeather() {
         handleLoadingState()
-        locationRepository.getCurrentLocation { location ->
-            if (location != null) {
-                currentLocation.value = location
+        viewModelScope.launch {
+            locationRepository.getCurrentLocation { location ->
+                if (location != null) {
+                    handleLocation(location)
 
-                val cityNameFromLocation = locationRepository.getCityNameFromLocation(location)
-                handleSuccessState(mapOf(ArgsKey.CITY to cityNameFromLocation))
-                getWeatherForLocation(location)
-            } else {
-                handleErrorState("Unable to get current location")
+                    val cityNameFromLocation = locationRepository.getCityNameFromLocation(location)
+                    handleSuccessState(mapOf(ArgsKey.CITY to cityNameFromLocation))
+
+                    getWeatherForLocation(location)
+                } else {
+                    handleErrorState("Unable to get current location")
+                }
             }
         }
     }
     
     fun getWeatherForLocation(location: Location) {
         handleLoadingState()
-        weatherRepository.getWeatherData(location) { data, exception ->
-            Handler(Looper.getMainLooper()).post {
+        viewModelScope.launch {
+            weatherRepository.getWeatherData(location) { data, exception ->
                 if (data != null) {
                     handleSuccessState(mapOf(ArgsKey.WEATHER to data))
                 } else {
+                    Log.e("WeatherViewModel", "getWeatherForLocation($location). Got exception: ${exception?.message} ${exception?.stackTraceToString()}")
                     handleErrorState(exception?.message ?: "Unknown error")
                 }
             }
@@ -76,58 +80,66 @@ class WeatherViewModel(
         }
 
         handleLoadingState()
-        weatherRepository.getWeatherByCity(city) { data, exception ->
-            if (data != null) {
-                handleSuccessState(
-                    mapOf(
-                        ArgsKey.CITY to data.cityName,
-                        ArgsKey.WEATHER to data
+        viewModelScope.launch {
+            weatherRepository.getWeatherByCity(city) { data, exception ->
+                // TODO: проверить, что обновляется и не просит Main
+                if (data != null) {
+                    handleSuccessState(
+                        mapOf(
+                            ArgsKey.CITY to data.data.cityName,
+                            ArgsKey.WEATHER to data
+                        )
                     )
-                )
-                currentLocation.value = Location(data.cityName)
-            } else {
-                handleErrorState("Unknown error")
-            }
-        }
-    }
-    
-    
-    fun formatTemperature(temp: Double): String {
-        return "${temp.toInt()}°C"
-    }
-    
-    
-    fun loadWeatherIcon(iconCode: String) {
-        coroutineScope.launch {
-            val iconUrl = WeatherIconMapper.getPngLink(iconCode)
-            ImageLoader.loadImage(iconUrl)
-        }
-    }
-    
-    
-    private fun startAutoRefresh() {
-        refreshTimer = Timer()
-        refreshTimer?.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                currentLocation.value?.let { location ->
-                    getWeatherForLocation(location)
+                   handleLocation(Location(data.data.cityName))
+                } else {
+                    Log.e("WeatherViewModel", "searchWeatherByCity($city). Got exception: ${exception?.message} ${exception?.stackTraceToString()}")
+                    handleErrorState(exception?.message ?: "Unknown error")
                 }
             }
-        }, 60000, 60000)
+        }
     }
-    
-    
+
     fun toggleFavorite() {
-        _weatherUiState.value.weatherData?.let { currData ->
+        _weatherUiState.value.data?.let { currData ->
             handleSuccessState(
                 mapOf(ArgsKey.WEATHER to currData.copy(isFavorite = !currData.isFavorite))
             )
         }
     }
+    
+    private fun startWeatherAutoRefresh() {
+        if (refreshTimer == null) {
+            refreshTimer = Timer()
+        }
+
+        refreshTimer?.schedule(object : TimerTask() {
+            override fun run() {
+                Log.d("WeatherViewModel", "Trying to refresh weather fot location ${_currentLocation.value}")
+                _currentLocation.value?.let { location -> getWeatherForLocation(location) }
+            }
+        }, refreshDelay, refreshDelay)
+    }
+
+    /**
+     * Starts app-global tracking geoposition with [LocationManager].
+     *
+     * @see ru.yandex.buggyweatherapp.utils.LocationTracker
+     */
+    fun startLocationTracking() = locationRepository.startLocationTracking()
+
+    /**
+     * Starts app-global tracking geoposition with [LocationManager].
+     *
+     * @see ru.yandex.buggyweatherapp.utils.LocationTracker
+     */
+    fun stopLocationTracking() = locationRepository.stopLocationTracking()
 
     override fun onCleared() {
-        super.onCleared()
+        refreshTimer?.cancel()
+        refreshTimer = null
+        locationRepository.unsubscribeToTracking(trackingListener)
 
+        super.onCleared()
     }
 
     //============================== UPDATING STATE BLOCK ==============================//
@@ -135,7 +147,7 @@ class WeatherViewModel(
     private enum class ArgsKey { WEATHER, CITY }
 
     /**
-     * Updated [_weatherUiState] with [WeatherUiState.weatherData] or/and [WeatherUiState.cityName].
+     * Updated [_weatherUiState] with [WeatherUiState.data] or/and [WeatherUiState.cityName].
      * For successful updating we need to provide map with keys and values:
      * * `ArgsKey.DATA` key for weatherData
      * * `ArgsKey.CITY` key for cityName
@@ -150,7 +162,7 @@ class WeatherViewModel(
      * ```
      *
      * @see ArgsKey
-     * @see WeatherData
+     * @see Weather
      */
     private fun handleSuccessState(args: Map<ArgsKey, Any?>) {
         _weatherUiState.update { _weatherUiState.value.copy(
@@ -158,7 +170,7 @@ class WeatherViewModel(
             isLoading = false,
 
             // if we have in arguments value with the key -> save it to new copy, otherwise - get current value
-            weatherData = if (args.containsKey(ArgsKey.WEATHER)) args[ArgsKey.WEATHER] as WeatherData? else _weatherUiState.value.weatherData,
+            data = if (args.containsKey(ArgsKey.WEATHER)) args[ArgsKey.WEATHER] as Weather? else _weatherUiState.value.data,
             cityName = if (args.containsKey(ArgsKey.CITY)) args[ArgsKey.CITY] as String? else _weatherUiState.value.cityName,
         ) }
     }
@@ -174,5 +186,10 @@ class WeatherViewModel(
      */
     private fun handleErrorState(message: String) =
         _weatherUiState.update { _weatherUiState.value.copy(isLoading = false, error = message) }
+
+
+    private fun handleLocation(location: Location?) {
+        _currentLocation.update { location }
+    }
 
 }

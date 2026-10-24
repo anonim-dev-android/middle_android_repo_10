@@ -1,9 +1,7 @@
 package ru.yandex.buggyweatherapp.di
 
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import ru.yandex.buggyweatherapp.data.repository.LocationRepository
 import ru.yandex.buggyweatherapp.data.repository.WeatherRepository
@@ -21,7 +19,6 @@ class DependencyContainer(context: Context) {
     )
 
     val viewModel = WeatherViewModel(
-        CoroutineScope(Dispatchers.IO + SupervisorJob()),
         weatherRepository,
         locationRepository
     )

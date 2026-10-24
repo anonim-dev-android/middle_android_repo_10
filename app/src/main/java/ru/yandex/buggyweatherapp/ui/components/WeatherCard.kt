@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import ru.yandex.buggyweatherapp.R
-import ru.yandex.buggyweatherapp.domain.model.WeatherData
+import ru.yandex.buggyweatherapp.data.model.WeatherData
 import ru.yandex.buggyweatherapp.utils.WeatherIconMapper
 
 @Composable

@@ -2,13 +2,16 @@ package ru.yandex.buggyweatherapp.data.repository
 
 import android.util.Log
 import com.google.gson.JsonObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ru.yandex.buggyweatherapp.data.api.WeatherApiService
 import ru.yandex.buggyweatherapp.data.model.WeatherMapper
 import ru.yandex.buggyweatherapp.domain.model.Location
-import ru.yandex.buggyweatherapp.domain.model.WeatherData
+import ru.yandex.buggyweatherapp.data.model.WeatherData
+import ru.yandex.buggyweatherapp.domain.model.Weather
 
 class WeatherRepository(
     private val weatherApi: WeatherApiService
@@ -16,36 +19,39 @@ class WeatherRepository(
     private var cachedWeatherData: WeatherData? = null
     
     
-    fun getWeatherData(location: Location, callback: (WeatherData?, Exception?) -> Unit) {
+    suspend fun getWeatherData(location: Location, callback: (Weather?, Exception?) -> Unit) = withContext(Dispatchers.IO) {
         val call = weatherApi.getCurrentWeather(location.latitude, location.longitude)
         try {
             val response = call.execute()
             if (response.isSuccessful) {
                 val weatherData = WeatherMapper.parseJson(response.body()!!)
                 cachedWeatherData = weatherData
-                callback(weatherData, null)
+                callback(WeatherMapper.parseToUserWeather(weatherData), null)
             } else {
-                callback(null, Exception("API Error: ${response.code()}"))
+                Log.e("WeatherRepository", "API Error: ${response.code()}")
+                sendCacheOrError(location.name, Exception("API Error: ${response.code()}"), callback)
             }
         } catch (e: Exception) {
             Log.e("WeatherRepository", "Error fetching weather", e)
-            callback(null, e)
+            sendCacheOrError(location.name, e, callback)
         }
     }
-    
-    fun getWeatherByCity(cityName: String, callback: (WeatherData?, Exception?) -> Unit) {
+
+    suspend fun getWeatherByCity(cityName: String, callback: (Weather?, Exception?) -> Unit) = withContext(Dispatchers.IO) {
         weatherApi.getWeatherByCity(cityName).enqueue(object : Callback<JsonObject> {
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 if (response.isSuccessful && response.body() != null) {
                     try {
-                        val json = response.body()!!
-                        val weatherData = WeatherMapper.parseJson(json)
-                        callback(weatherData, null)
+                        val weatherData = WeatherMapper.parseJson(response.body()!!)
+                        cachedWeatherData = weatherData
+                        callback(WeatherMapper.parseToUserWeather(weatherData), null)
                     } catch (e: Exception) {
-                        callback(null, e)
+                        Log.e("WeatherRepository", "Error fetching weather", e)
+                        sendCacheOrError(cityName, e, callback)
                     }
                 } else {
-                    callback(null, Exception("Error fetching weather data"))
+                    Log.e("WeatherRepository", "Error fetching weather. API Error: ${response.code()}")
+                    sendCacheOrError(cityName, Exception("Error fetching weather data. API Error: ${response.code()}"), callback)
                 }
             }
 
@@ -53,6 +59,21 @@ class WeatherRepository(
                 callback(null, Exception(t))
             }
         })
+    }
+
+    /**
+     * If cached weather is from given city - return it.
+     * Otherwise - return exception
+     */
+    private fun sendCacheOrError(cityName: String?, e: Exception, callback: (Weather?, Exception?) -> Unit) {
+        when {
+            cityName == null -> callback(null, e)
+            cachedWeatherData?.cityName == cityName -> {
+                // cachedWeatherData is not null here because cityName is not nullable
+                callback(WeatherMapper.parseToUserWeather(cachedWeatherData!!), null)
+            }
+            else -> callback(null, e)
+        }
     }
 
 }
