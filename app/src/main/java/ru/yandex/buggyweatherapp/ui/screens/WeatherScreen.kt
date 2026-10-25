@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,10 +20,6 @@ import ru.yandex.buggyweatherapp.ui.components.WeatherCard
 
 @Composable
 fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
-
-    LaunchedEffect(Unit) {
-        viewModel.initialize()
-    }
 
     val context = LocalContext.current
     val uiState by viewModel.weatherUiState.collectAsStateWithLifecycle()

@@ -3,15 +3,12 @@ package ru.yandex.buggyweatherapp.utils
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.widget.ImageView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 
 object ImageLoader {
     
     private val imageCache = ConcurrentHashMap<String, Bitmap>()
-    private val viewReferences = HashMap<String, ImageView>()
     
     
     fun loadImageSync(url: String): Bitmap? {
@@ -38,8 +35,6 @@ object ImageLoader {
     
     
     fun loadInto(url: String, imageView: ImageView) {
-        viewReferences[url] = imageView
-        
         if (imageCache.containsKey(url)) {
             imageView.setImageBitmap(imageCache[url])
         } else {

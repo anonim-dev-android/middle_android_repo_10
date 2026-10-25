@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Call
@@ -14,16 +15,19 @@ import ru.yandex.buggyweatherapp.data.model.WeatherMapper
 import ru.yandex.buggyweatherapp.domain.model.Location
 import ru.yandex.buggyweatherapp.data.model.WeatherData
 import ru.yandex.buggyweatherapp.domain.model.Weather
+import ru.yandex.buggyweatherapp.domain.repository.FavRepository
+import ru.yandex.buggyweatherapp.domain.repository.WeatherRepository
+import javax.inject.Inject
 
-class WeatherRepository(
-    private val callbackScope: CoroutineScope,
+class WeatherRepositoryImpl @Inject constructor(
     private val weatherApi: WeatherApiService,
     private val favRepository: FavRepository
-) {
+): WeatherRepository {
+    private val callbackScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var cachedWeatherData: WeatherData? = null
     
     
-    suspend fun getWeatherData(location: Location, callback: (Weather?, Exception?) -> Unit) = withContext(Dispatchers.IO) {
+    override suspend fun getWeatherData(location: Location, callback: (Weather?, Exception?) -> Unit) = withContext(Dispatchers.IO) {
         val call = weatherApi.getCurrentWeather(location.latitude, location.longitude)
         try {
             val response = call.execute()
@@ -42,7 +46,7 @@ class WeatherRepository(
         }
     }
 
-    suspend fun getWeatherByCity(cityName: String, callback: (Weather?, Exception?) -> Unit) = withContext(Dispatchers.IO) {
+    override suspend fun getWeatherByCity(cityName: String, callback: (Weather?, Exception?) -> Unit) = withContext(Dispatchers.IO) {
         weatherApi.getWeatherByCity(cityName).enqueue(object : Callback<JsonObject> {
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 callbackScope.launch {

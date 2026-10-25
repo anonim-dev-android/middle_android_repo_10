@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -17,12 +18,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.AndroidEntryPoint
 import ru.yandex.buggyweatherapp.ui.screens.WeatherScreen
+import ru.yandex.buggyweatherapp.ui.screens.WeatherViewModel
 import ru.yandex.buggyweatherapp.ui.theme.BuggyWeatherAppTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val weatherViewModel by lazy { this.depContainer().viewModel }
+    private val weatherViewModel: WeatherViewModel by viewModels()
 
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -30,11 +34,11 @@ class MainActivity : ComponentActivity() {
         when {
             permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
                 Log.d("Main", "ACCESS_FINE_LOCATION is granted")
-                weatherViewModel.startLocationTracking()
+                start()
             }
             permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
                 Log.d("Main", "ACCESS_COARSE_LOCATION is granted")
-                weatherViewModel.startLocationTracking()
+                start()
             }
             else -> {
                 Log.e("Main", "No location permissions have been granted")
@@ -78,7 +82,14 @@ class MainActivity : ComponentActivity() {
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 )
             )
+        } else {
+            start()
         }
+    }
+
+    private fun start() {
+        weatherViewModel.startLocationTracking()
+        weatherViewModel.initialize()
     }
 
     override fun onDestroy() {

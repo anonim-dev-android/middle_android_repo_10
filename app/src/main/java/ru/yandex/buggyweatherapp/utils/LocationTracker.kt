@@ -1,6 +1,5 @@
 package ru.yandex.buggyweatherapp.utils
 
-import android.content.Context
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -10,9 +9,12 @@ import android.os.Looper
 import android.util.Log
 import ru.yandex.buggyweatherapp.data.model.LocationMapper
 import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
+import javax.inject.Singleton
 import ru.yandex.buggyweatherapp.domain.model.Location as LocalLocation
 
-class LocationTracker private constructor(
+@Singleton
+class LocationTracker @Inject constructor(
     private val locationManager: LocationManager
 ) {
     
@@ -72,18 +74,4 @@ class LocationTracker private constructor(
         }
     }
 
-
-    companion object {
-        @Volatile
-        private var instance: LocationTracker? = null
-
-        fun getInstance(context: Context): LocationTracker {
-            return instance ?: synchronized(this) {
-                instance ?: LocationTracker(
-                    context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                ).also { instance = it }
-            }
-        }
-    }
-    
 }

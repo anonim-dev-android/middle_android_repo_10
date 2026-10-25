@@ -1,11 +1,12 @@
 [versions]
 agp = "8.8.1"
-kotlin = "2.0.0"
+kotlin = "2.0.21"
 ksp = "2.0.21-1.0.26"
 coreKtx = "1.10.1"
 lifecycleRuntimeKtx = "2.6.1"
 composeBom = "2024.04.01"
 compose = "1.8.0"
+hilt = "2.51.1"
 retrofit = "2.10.0"
 okhttp = "4.10.0"
 room = "2.6.1"
@@ -16,6 +17,7 @@ coil = "2.5.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
+leakcanary = "1.0.0"
 
 
 [libraries]
@@ -29,6 +31,9 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 
 squareup-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 squareup-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
@@ -50,6 +55,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+leakcanary = { group = "com.android.tools.studio.leakcanary", name = "leakcanary", version.ref = "leakcanary" }
 
 
 [bundles]
@@ -68,4 +74,5 @@ viewmodel = [ "lifecycle-viewmodel-ktx", "lifecycle-viewmodel-compose" ]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 tools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

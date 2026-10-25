@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
     alias(libs.plugins.tools.ksp)
 }
 
@@ -51,11 +52,15 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose.ui)
     implementation(libs.androidx.material3)
-    
+
     // Other
     implementation(libs.bundles.network)
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.viewmodel)
+
+    implementation(libs.hilt.android)
+    debugImplementation(libs.leakcanary)
+    ksp(libs.hilt.compiler)
 
     implementation(libs.bundles.room)
     ksp(libs.room.compiler)

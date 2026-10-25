@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -101,13 +102,12 @@ fun HeaderBlock(
 @Composable
 fun WeatherImageBlock(weather: Weather) {
     val context = LocalContext.current
-    val imageView = remember { ImageView(context) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AndroidView(
-            factory = { imageView },
+            factory = { context -> ImageView(context) },
             modifier = Modifier.size(50.dp)
         ) {
             ImageLoader.loadInto(

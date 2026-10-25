@@ -1,13 +1,7 @@
 package ru.yandex.buggyweatherapp
 
 import android.app.Application
-import android.content.Context
-import ru.yandex.buggyweatherapp.di.DependencyContainer
+import dagger.hilt.android.HiltAndroidApp
 
-class WeatherApplication : Application() {
-
-    val depContainer by lazy { DependencyContainer(this) }
-
-}
-
-fun Context.depContainer() = (this.applicationContext as WeatherApplication).depContainer
+@HiltAndroidApp
+class WeatherApplication : Application()

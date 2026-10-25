@@ -10,31 +10,33 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import ru.yandex.buggyweatherapp.data.model.LocationMapper
 import ru.yandex.buggyweatherapp.domain.model.Location
+import ru.yandex.buggyweatherapp.domain.repository.LocationRepository
 import ru.yandex.buggyweatherapp.utils.LocationTracker
+import javax.inject.Inject
 
-class LocationRepository(
+class LocationRepositoryImpl @Inject constructor(
     private val fusedLocationClient: FusedLocationProviderClient,
     private val geocoder: Geocoder,
     private val locationTracker: LocationTracker
-) {
+): LocationRepository {
 
-    fun startLocationTracking() {
+    override fun startLocationTracking() {
         locationTracker.startTracking()
     }
 
-    fun subscribeToTracking(listener: (Location) -> Unit) {
+    override fun subscribeToTracking(listener: (Location) -> Unit) {
         locationTracker.addListener(listener)
     }
 
-    fun unsubscribeToTracking(listener: (Location) -> Unit) {
+    override fun unsubscribeToTracking(listener: (Location) -> Unit) {
         locationTracker.removeListener(listener)
     }
 
-    fun stopLocationTracking() {
+    override fun stopLocationTracking() {
         locationTracker.stopTracking()
     }
 
-    fun getCurrentLocation(callback: (Location?) -> Unit) {
+    override fun getCurrentLocation(callback: (Location?) -> Unit) {
         try {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
@@ -87,7 +89,7 @@ class LocationRepository(
     }
     
     
-    fun getCityNameFromLocation(location: Location): String? {
+    override fun getCityNameFromLocation(location: Location): String? {
         try {
             @Suppress("DEPRECATION")
             val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)

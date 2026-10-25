@@ -3,19 +3,22 @@ package ru.yandex.buggyweatherapp.ui.screens
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.yandex.buggyweatherapp.data.repository.FavRepository
-import ru.yandex.buggyweatherapp.data.repository.LocationRepository
-import ru.yandex.buggyweatherapp.data.repository.WeatherRepository
 import ru.yandex.buggyweatherapp.domain.model.Location
 import ru.yandex.buggyweatherapp.domain.model.Weather
+import ru.yandex.buggyweatherapp.domain.repository.FavRepository
+import ru.yandex.buggyweatherapp.domain.repository.LocationRepository
+import ru.yandex.buggyweatherapp.domain.repository.WeatherRepository
 import java.util.Timer
 import java.util.TimerTask
+import javax.inject.Inject
 
-class WeatherViewModel(
+@HiltViewModel
+class WeatherViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository,
     private val favRepository: FavRepository
@@ -37,6 +40,7 @@ class WeatherViewModel(
     }
     
     fun initialize() {
+        Log.i("WeatherViewModel", "init")
         // subscribing to tracking
         locationRepository.subscribeToTracking(trackingListener)
         fetchCurrentLocationWeather()
@@ -140,6 +144,7 @@ class WeatherViewModel(
     fun stopLocationTracking() = locationRepository.stopLocationTracking()
 
     override fun onCleared() {
+        Log.i("WeatherViewModel", "onCleared")
         refreshTimer?.cancel()
         refreshTimer = null
         locationRepository.unsubscribeToTracking(trackingListener)
