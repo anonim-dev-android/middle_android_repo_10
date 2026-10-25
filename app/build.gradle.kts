@@ -1,9 +1,27 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.tools.ksp)
+}
+
+val localProperties = Properties().apply {
+    val propertiesFile = rootProject.file("local.properties")
+    if (propertiesFile.exists()) {
+        load(propertiesFile.inputStream())
+    }
+}
+val weatherApiKey = localProperties.getProperty("WEATHER_API_KEY") ?: ""
+val weatherBaseUrl = localProperties.getProperty("WEATHER_BASE_URL") ?: ""
+
+val keystoreProperties = Properties().apply {
+    val propertiesFile = rootProject.file("keystore.properties")
+    if (propertiesFile.exists()) {
+        load(propertiesFile.inputStream())
+    }
 }
 
 android {
@@ -20,13 +38,31 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file(keystoreProperties["STORE_FILE"] as String)
+            storePassword = keystoreProperties["STORE_PWD"] as String
+            keyAlias = keystoreProperties["KEY_ALIAS"] as String
+            keyPassword = keystoreProperties["KEY_PWD"] as String
+        }
+    }
+
     buildTypes {
+        debug {
+            buildConfigField("String", "WEATHER_BASE_URL", weatherBaseUrl)
+            buildConfigField("String", "WEATHER_API_KEY", weatherApiKey)
+        }
         release {
-            isMinifyEnabled = false
+            buildConfigField("String", "WEATHER_BASE_URL", weatherBaseUrl)
+            buildConfigField("String", "WEATHER_API_KEY", weatherApiKey)
+
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -37,6 +73,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
