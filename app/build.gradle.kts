@@ -1,7 +1,27 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.tools.ksp)
+}
+
+val localProperties = Properties().apply {
+    val propertiesFile = rootProject.file("local.properties")
+    if (propertiesFile.exists()) {
+        load(propertiesFile.inputStream())
+    }
+}
+val weatherApiKey = localProperties.getProperty("WEATHER_API_KEY") ?: ""
+val weatherBaseUrl = localProperties.getProperty("WEATHER_BASE_URL") ?: ""
+
+val keystoreProperties = Properties().apply {
+    val propertiesFile = rootProject.file("keystore.properties")
+    if (propertiesFile.exists()) {
+        load(propertiesFile.inputStream())
+    }
 }
 
 android {
@@ -18,13 +38,31 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file(keystoreProperties["STORE_FILE"] as String)
+            storePassword = keystoreProperties["STORE_PWD"] as String
+            keyAlias = keystoreProperties["KEY_ALIAS"] as String
+            keyPassword = keystoreProperties["KEY_PWD"] as String
+        }
+    }
+
     buildTypes {
+        debug {
+            buildConfigField("String", "WEATHER_BASE_URL", weatherBaseUrl)
+            buildConfigField("String", "WEATHER_API_KEY", weatherApiKey)
+        }
         release {
-            isMinifyEnabled = false
+            buildConfigField("String", "WEATHER_BASE_URL", weatherBaseUrl)
+            buildConfigField("String", "WEATHER_API_KEY", weatherApiKey)
+
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -35,6 +73,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
@@ -43,41 +82,43 @@ dependencies {
     // Android core libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation("androidx.compose.runtime:runtime-livedata:1.8.0")
+    implementation(libs.androidx.compose.activity)
+    implementation(libs.androidx.compose.runtime)
     
     // Compose
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.bundles.compose.ui)
     implementation(libs.androidx.material3)
-    
-    // Network
-    implementation("com.squareup.retrofit2:retrofit:2.10.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    
-    // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    
-    // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    
+
+    // Other
+    implementation(libs.bundles.network)
+    implementation(libs.bundles.coroutines)
+    implementation(libs.bundles.viewmodel)
+
+    implementation(libs.hilt.android)
+    debugImplementation(libs.leakcanary)
+    ksp(libs.hilt.compiler)
+
+    implementation(libs.bundles.room)
+    ksp(libs.room.compiler)
+
     // Location
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-    
+    implementation(libs.play.services.location)
+
     // Coil image loading
-    implementation("io.coil-kt:coil-compose:2.5.0")
-    
-    // Testing
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    implementation(libs.coil)
+
+
+    // Debug only
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+
+    // Testing
+    testImplementation(libs.junit)
+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
 }

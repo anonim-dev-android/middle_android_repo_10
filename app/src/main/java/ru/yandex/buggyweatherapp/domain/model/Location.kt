@@ -1,10 +1,12 @@
-package ru.yandex.buggyweatherapp.model
+package ru.yandex.buggyweatherapp.domain.model
 
 data class Location(
     val latitude: Double,
     val longitude: Double,
     val name: String? = null
 ) {
+
+    constructor(name: String): this(0.0, 0.0, name)
     
     override fun toString(): String {
         var result = ""
