@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class FavModel(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val countryCode: String? = null,
     val cityName: String,
     val isFavorite: Boolean
 )

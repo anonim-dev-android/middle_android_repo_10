@@ -5,7 +5,7 @@ import ru.yandex.buggyweatherapp.domain.model.Location
 interface LocationRepository {
 
     /**
-     * Get current location from location client.
+     * Get current real (= where we now) location from location client.
      * @param callback function to handle results (either success or error)
      */
     fun getCurrentLocation(callback: (Location?) -> Unit)

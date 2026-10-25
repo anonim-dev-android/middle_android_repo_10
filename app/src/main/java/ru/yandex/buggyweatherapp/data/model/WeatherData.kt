@@ -1,5 +1,7 @@
 package ru.yandex.buggyweatherapp.data.model
 
+import ru.yandex.buggyweatherapp.domain.model.Location
+
 data class WeatherData(
     val cityName: String,
     val country: String?,
@@ -20,8 +22,8 @@ data class WeatherData(
     val sunsetTime: Long,
     val timezone: Int,
     val timestamp: Long,
-
     val rawApiData: String,
+    val location: Location?,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -48,6 +50,7 @@ data class WeatherData(
         if (sunriseTime != other.sunriseTime) return false
         if (sunsetTime != other.sunsetTime) return false
         if (timezone != other.timezone) return false
+        if (location != other.location) return false
         // except timestamp, rawApiData
         return true
     }
@@ -72,6 +75,7 @@ data class WeatherData(
         result = 31 * result + sunsetTime.hashCode()
         result = 31 * result + timezone
         result = 31 * result + timestamp.hashCode()
+        result = 31 * result + location.hashCode()
         return result
     }
 }

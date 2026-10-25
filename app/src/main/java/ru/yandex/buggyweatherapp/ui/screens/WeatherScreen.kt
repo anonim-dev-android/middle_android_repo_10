@@ -31,7 +31,8 @@ fun WeatherScreen(viewModel: WeatherViewModel, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LocationSearch(
-            onCitySearch = viewModel::searchWeatherByCity
+            onCitySearch = viewModel::searchWeatherByCity,
+            onCurrentRealLocation = viewModel::fetchCurrentRealLocationWeather
         )
         
         Spacer(modifier = Modifier.height(16.dp))

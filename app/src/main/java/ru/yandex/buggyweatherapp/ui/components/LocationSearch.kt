@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,7 +24,8 @@ import ru.yandex.buggyweatherapp.R
 
 @Composable
 fun LocationSearch(
-    onCitySearch: (String) -> Unit
+    onCitySearch: (String) -> Unit,
+    onCurrentRealLocation: () -> Unit
 ) {
     val context = LocalContext.current
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -35,14 +37,14 @@ fun LocationSearch(
         value = searchText,
         onValueChange = { searchText = it },
         label = { Text(context.getString(R.string.search_city)) },
-//        leadingIcon = {
-//            IconButton(onClick = { onLocationRequest() }) {
-//                Icon(
-//                    Icons.Default.LocationOn,
-//                    contentDescription = context.getString(R.string.get_current_location)
-//                )
-//            }
-//        },
+        leadingIcon = {
+            IconButton(onClick = onCurrentRealLocation) {
+                Icon(
+                    Icons.Default.LocationOn,
+                    contentDescription = context.getString(R.string.get_current_location)
+                )
+            }
+        },
         trailingIcon = {
             IconButton(onClick = { 
                 if (searchText.isNotBlank()) {

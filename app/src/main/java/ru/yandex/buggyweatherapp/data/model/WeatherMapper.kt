@@ -2,6 +2,7 @@ package ru.yandex.buggyweatherapp.data.model
 
 import android.util.Log
 import com.google.gson.JsonObject
+import ru.yandex.buggyweatherapp.domain.model.Location
 import ru.yandex.buggyweatherapp.domain.model.Weather
 
 object WeatherMapper {
@@ -16,6 +17,7 @@ object WeatherMapper {
         val sys = json.getAsJsonObject("sys")
         val weather = json.getAsJsonArray("weather").get(0).asJsonObject
         val clouds = json.getAsJsonObject("clouds")
+        val coord = json.getAsJsonObject("coord")
 
         return WeatherData(
             cityName = json.get("name").asString,
@@ -36,6 +38,11 @@ object WeatherMapper {
             timezone = json.get("timezone").asInt,
             timestamp = json.get("dt").asLong,
             rawApiData = json.toString(),
+            location = Location(
+                longitude = coord.get("lon").asDouble,
+                latitude = coord.get("lat").asDouble,
+                name = json.get("name").asString
+            ),
             rain = if (json.has("rain") && json.getAsJsonObject("rain").has("1h"))
                 json.getAsJsonObject("rain").get("1h").asDouble else null,
             snow = if (json.has("snow") && json.getAsJsonObject("snow").has("1h"))

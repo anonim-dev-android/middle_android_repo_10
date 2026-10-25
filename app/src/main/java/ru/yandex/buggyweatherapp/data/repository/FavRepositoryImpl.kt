@@ -12,14 +12,14 @@ class FavRepositoryImpl @Inject constructor(
 ): FavRepository {
 
 
-    override suspend fun isCityFavorite(cityName: String) = withContext(Dispatchers.IO) {
-        favDao.isCityFavorite(cityName) ?: false
+    override suspend fun isCityFavorite(cityName: String, country: String?) = withContext(Dispatchers.IO) {
+        favDao.isCityFavorite(cityName, country) ?: false
     }
 
 
-    override suspend fun setCityFavState(cityName: String, isFavorite: Boolean) = withContext(Dispatchers.IO) {
-        when(favDao.isCityFavorite(cityName)) {
-            null -> favDao.addFavoriteCity(FavModel(cityName = cityName, isFavorite = isFavorite))
+    override suspend fun setCityFavState(cityName: String, country: String?, isFavorite: Boolean) = withContext(Dispatchers.IO) {
+        when(favDao.isCityFavorite(cityName, country)) {
+            null -> favDao.addFavoriteCity(FavModel(cityName = cityName, countryCode = country, isFavorite = isFavorite))
             else -> favDao.setCityFavorite(cityName, isFavorite)
         }
     }

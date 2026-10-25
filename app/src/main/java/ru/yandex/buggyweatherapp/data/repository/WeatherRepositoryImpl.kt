@@ -34,7 +34,7 @@ class WeatherRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 val weatherData = WeatherMapper.parseJson(response.body()!!)
                 cachedWeatherData = weatherData
-                val isFavouriteCity = favRepository.isCityFavorite(weatherData.cityName)
+                val isFavouriteCity = favRepository.isCityFavorite(weatherData.cityName, weatherData.country)
                 callback(WeatherMapper.parseToUserWeather(weatherData, isFavouriteCity), null)
             } else {
                 Log.e("WeatherRepository", "API Error: ${response.code()}")
@@ -54,7 +54,7 @@ class WeatherRepositoryImpl @Inject constructor(
                         try {
                             val weatherData = WeatherMapper.parseJson(response.body()!!)
                             cachedWeatherData = weatherData
-                            val isFavouriteCity = favRepository.isCityFavorite(weatherData.cityName)
+                            val isFavouriteCity = favRepository.isCityFavorite(weatherData.cityName, weatherData.country)
                             callback(WeatherMapper.parseToUserWeather(weatherData, isFavouriteCity), null)
                         } catch (e: Exception) {
                             Log.e("WeatherRepository", "Error fetching weather", e)
@@ -82,7 +82,7 @@ class WeatherRepositoryImpl @Inject constructor(
             cityName == null -> callback(null, e)
             cachedWeatherData?.cityName == cityName -> {
                 // cachedWeatherData is not null here because cityName is not nullable
-                val isFavouriteCity = favRepository.isCityFavorite(cachedWeatherData!!.cityName)
+                val isFavouriteCity = favRepository.isCityFavorite(cachedWeatherData!!.cityName, cachedWeatherData!!.country)
                 callback(WeatherMapper.parseToUserWeather(cachedWeatherData!!, isFavouriteCity), null)
             }
             else -> callback(null, e)

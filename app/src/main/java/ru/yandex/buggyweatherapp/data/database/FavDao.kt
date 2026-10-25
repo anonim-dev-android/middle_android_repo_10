@@ -12,8 +12,8 @@ interface FavDao {
     /**
      * @return `true` if the record exists and is favorite, `false` if the record exists and not is favorite, otherwise - `null`
      */
-    @Query("SELECT isFavorite FROM favourites_cities WHERE cityName = :cityName LIMIT 1")
-    fun isCityFavorite(cityName: String): Boolean?
+    @Query("SELECT isFavorite FROM favourites_cities WHERE cityName = :cityName AND countryCode = :country LIMIT 1")
+    fun isCityFavorite(cityName: String, country: String?): Boolean?
 
     @Query("UPDATE favourites_cities SET isFavorite = :isFavorite WHERE cityName = :cityName")
     fun setCityFavorite(cityName: String, isFavorite: Boolean): Int

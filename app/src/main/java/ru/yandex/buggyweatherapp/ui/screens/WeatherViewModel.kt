@@ -43,11 +43,10 @@ class WeatherViewModel @Inject constructor(
         Log.i("WeatherViewModel", "init")
         // subscribing to tracking
         locationRepository.subscribeToTracking(trackingListener)
-        fetchCurrentLocationWeather()
         startWeatherAutoRefresh()
     }
     
-    private fun fetchCurrentLocationWeather() {
+    fun fetchCurrentRealLocationWeather() {
         handleLoadingState()
         viewModelScope.launch {
             locationRepository.getCurrentLocation { location ->
@@ -97,7 +96,7 @@ class WeatherViewModel @Inject constructor(
                             ArgsKey.WEATHER to data
                         )
                     )
-                   handleLocation(Location(data.data.cityName))
+                   handleLocation(data.data.location ?: Location(data.data.cityName))
                 } else {
                     Log.e("WeatherViewModel", "searchWeatherByCity($city). Got exception: ${exception?.message} ${exception?.stackTraceToString()}")
                     handleErrorState(exception?.message ?: "Unknown error")
@@ -110,7 +109,7 @@ class WeatherViewModel @Inject constructor(
         viewModelScope.launch {
             _weatherUiState.value.data?.let { currData ->
                 val newFavState = !currData.isFavorite
-                favRepository.setCityFavState(currData.data.cityName, newFavState)
+                favRepository.setCityFavState(currData.data.cityName, currData.data.country, newFavState)
                 handleSuccessState(mapOf(ArgsKey.WEATHER to currData.copy(isFavorite = newFavState)))
             }
         }
